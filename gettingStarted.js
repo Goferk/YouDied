@@ -28,13 +28,13 @@ var turno = {
 
 Estado1.preload = function () {
     Kiwi.State.prototype.preload.call(this);
-    this.addSpriteSheet('blockSprite', 'bloque.png', 25, 25 );
-    this.addSpriteSheet('bossSprite', 'b.png', 25, 25 );
-    this.addSpriteSheet('heroe1Sprite', 'p1.png', 25, 25 );
-    this.addSpriteSheet('heroe2Sprite', 'p2.png', 25, 25 );
-    this.addSpriteSheet('heroe3Sprite', 'p3.png', 25, 25 );
-    this.addSpriteSheet('heroe4Sprite', 'p4.png', 25, 25 );
-    this.addImage( 'background', 'background.png' );
+    this.addSpriteSheet('blockSprite', 'media/bloque.png', 25, 25 );
+    this.addSpriteSheet('bossSprite', 'media/b.png', 25, 25 );
+    this.addSpriteSheet('heroe1Sprite', 'media/p1.png', 25, 25 );
+    this.addSpriteSheet('heroe2Sprite', 'media/p2.png', 25, 25 );
+    this.addSpriteSheet('heroe3Sprite', 'media/p3.png', 25, 25 );
+    this.addSpriteSheet('heroe4Sprite', 'media/p4.png', 25, 25 );
+    this.addImage( 'background', 'media/background.png' );
 }
 
 Estado1.create = function(){
