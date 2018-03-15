@@ -2,15 +2,13 @@ var myGame = new Kiwi.Game('body', 'You Died', null, {'width': 1100, 'height': 6
 
 var Estado1 = new Kiwi.State( "Estado1" );
 var Juego = [];
+var sprites = [];
 
 for (let i = 0; i < 24; i++) {
   Juego[i] = []
   for (let j = 0; j < 24; j++) {
-    if (i == 11 && j == 11) Juego[i][j] = 'p1';
-    else if (i == 12 && j == 11) Juego[i][j] = 'p2';
-    else if (i == 11 && j == 12) Juego[i][j] = 'p3';
-    else if (i == 12 && j == 12) Juego[i][j] = 'p4';
-    else if (i == 0 && j == 0) Juego[i][j] = 'b';
+    if (i == 1 && j == 1) Juego[i][j] = 'b1';
+    else if (i == 22 && j == 22) Juego[i][j] = 'b2';
     else Juego[i][j] = '0';
   }
 }
@@ -21,92 +19,40 @@ var turno = {
   mov: false,
   onSelectx: 0,
   onSelecty: 0,
-  f1: 2,
-  f2: 2,
-  f3: 4
+  m: 10,
+  enemyE: 'e1',
+  b1: [1, 1, 1],
+  b2: [22, 22, 3],
+  chickendinner: false
 };
 
 Estado1.preload = function () {
     Kiwi.State.prototype.preload.call(this);
     this.addSpriteSheet('blockSprite', 'media/bloque.png', 25, 25 );
-    this.addSpriteSheet('bossSprite', 'media/b.png', 25, 25 );
-    this.addSpriteSheet('heroe1Sprite', 'media/p1.png', 25, 25 );
-    this.addSpriteSheet('heroe2Sprite', 'media/p2.png', 25, 25 );
-    this.addSpriteSheet('heroe3Sprite', 'media/p3.png', 25, 25 );
-    this.addSpriteSheet('heroe4Sprite', 'media/p4.png', 25, 25 );
+    this.addSpriteSheet('b1S', 'media/b1.png', 25, 25 );
+    this.addSpriteSheet('b2S', 'media/b2.png', 25, 25 );
+    this.addSpriteSheet('e1S', 'media/e1.png', 25, 25 );
+    this.addSpriteSheet('e2S', 'media/e2.png', 25, 25 );
     this.addImage( 'background', 'media/background.png' );
 }
 
 Estado1.create = function(){
-  this.myButton = new Kiwi.HUD.Widget.Button( this.game, 'Finalizar Turno', 650, 25 );
-  this.game.huds.defaultHUD.addWidget( this.myButton );
-
-  this.myButton.style.color = 'white';
-  this.myButton.style.fontSize = '2em';
-  this.myButton.style.fontWeight = 'bold';
-  this.myButton.style.padding = '0.5em 1em';
-  this.myButton.style.backgroundColor = 'black';
-  this.myButton.style.cursor = 'pointer';
-
-  this.counterTextJ1 = new Kiwi.GameObjects.Textfield( this, "TIEMPO J1: 8:00", 650, 150, "#000", 32, 'normal' );
-  this.counterTextJ2 = new Kiwi.GameObjects.Textfield( this, "TIEMPO J2: 8:00", 650, 200, "#000", 32, 'normal' );
-  this.timerJ1 = this.game.time.clock.createTimer('timeJ1', 1, 480, false);
-  this.timerJ1.createTimerEvent( Kiwi.Time.TimerEvent.TIMER_STOP, this.fin1, this );
-  this.timerJ1.createTimerEvent( Kiwi.Time.TimerEvent.TIMER_COUNT, this.contJ1, this );
-  this.timerJ1.start();
-  this.timerJ1.pause();
-
-  this.timerJ2 = this.game.time.clock.createTimer('timeJ2', 1, 480, false);
-  this.timerJ2.createTimerEvent( Kiwi.Time.TimerEvent.TIMER_STOP, this.fin2, this );
-  this.timerJ2.createTimerEvent( Kiwi.Time.TimerEvent.TIMER_COUNT, this.contJ2, this );
-
-  this.timerJ2.start();
-
-  this.myButton.input.onDown.add( this.buttonPressed, this );
-  this.myButton.input.onUp.add( this.buttonReleased, this );
-
-  this.myButton.input.onOver.add( this.buttonOver, this );
-  this.myButton.input.onOut.add( this.buttonOut, this );
-
-  Kiwi.State.prototype.create.call( this );
-
   this.background = new Kiwi.GameObjects.StaticImage( this, this.textures.background, 0, 0 );
-  this.p1 = new Kiwi.GameObjects.Sprite( this, this.textures.heroe1Sprite, 12*25, 12*25 );
-  this.p2 = new Kiwi.GameObjects.Sprite( this, this.textures.heroe2Sprite, 13*25, 12*25 );
-  this.p3 = new Kiwi.GameObjects.Sprite( this, this.textures.heroe3Sprite, 12*25, 13*25 );
-  this.p4 = new Kiwi.GameObjects.Sprite( this, this.textures.heroe4Sprite, 13*25, 13*25 );
-  this.b = new Kiwi.GameObjects.Sprite( this, this.textures.bossSprite, 25, 25 );
-
-  for (let i = 1; i <= 24; i++) {
-    for (let j = 1; j <= 24; j++) {
-      this['tablero' + i.toString() + 'x' + j.toString()] = new Kiwi.GameObjects.Sprite( this, this.textures.blockSprite, 25*i, 25*j );
-    }
-  }
-
   this.addChild( this.background );
-
-  for (let i = 1; i <= 24; i++) {
-    for (let j = 1; j <= 24; j++) {
-      this['tablero' + i.toString() + 'x' + j.toString()].animation.add("normal", [0], 0.1, false);
-      this['tablero' + i.toString() + 'x' + j.toString()].animation.add("disponible", [1], 0.1, false);
-      this['tablero' + i.toString() + 'x' + j.toString()].animation.play("normal");
-      this['tablero' + i.toString() + 'x' + j.toString()].input.onUp.add(this.moverse, this);
-      this.addChild( this['tablero' + i.toString() + 'x' + j.toString()] );
-    }
-  }
-  this.p1.input.onDown.add(this.disponibilidad2, this);
-  this.p2.input.onDown.add(this.disponibilidad2, this);
-  this.p3.input.onDown.add(this.disponibilidad2, this);
-  this.p4.input.onDown.add(this.disponibilidad2, this);
-  this.b.input.onDown.add(this.disponibilidad1, this);
-
-  this.addChild( this.p1 );
-  this.addChild( this.p2 );
-  this.addChild( this.p3 );
-  this.addChild( this.p4 );
-  this.addChild( this.b );
-  this.addChild( this.counterTextJ1 );
-  this.addChild( this.counterTextJ2 );
+  crearTimers(this);
+  crearBoton(this);
+  Kiwi.State.prototype.create.call( this );
+  crearTablero(this);
+  this.turnoDe = new Kiwi.GameObjects.Textfield( this, "Esta jugando el jugador 2!", 650, 100, "#000", 32, 'normal' );
+  this.addChild( this.turnoDe );
+  sprites.push('turnoDe');
+  this.movimientos = new Kiwi.GameObjects.Textfield( this, "Te quedan 10 Movimientos", 650, 250, "#000", 32, 'normal' );
+  this.addChild( this.movimientos );
+  sprites.push('movimientos');
+  this.winner = new Kiwi.GameObjects.Textfield( this, "", 200, 150, "#000", 50, 'normal' );
+  this.addChild( this.winner );
+  crearBosses(this);
+  crearEsclavos(this);
 }
 
 Estado1.moverse = function () {
@@ -114,24 +60,10 @@ Estado1.moverse = function () {
   let newY = Math.floor(this.game.input.y / 25);
   let mov = Math.abs(newX-turno.onSelectx) + Math.abs(newY-turno.onSelecty);
 
-  if (turno.mov && mov && Juego[newX-1][newY-1] == '0' && mov <= turno.f1 + turno.f2 + turno.f3) {
-    if (turno.f1 && mov <= turno.f1) turno.f1 = 0;
-    else if (turno.f2 && mov <= turno.f2) turno.f2 = 0;
-    else if (turno.f3 && mov <= turno.f3) turno.f3 = 0;
-    else if (turno.f1 && turno.f2 && mov <= turno.f1 + turno.f2) {
-      turno.f1 = 0;
-      turno.f2 = 0;
-    } else if (turno.f1 && turno.f3 && mov <= turno.f1 + turno.f3) {
-      turno.f1 = 0;
-      turno.f3 = 0;
-    } else if (turno.f2 && turno.f3 && mov <= turno.f2 + turno.f3) {
-      turno.f2 = 0;
-      turno.f3 = 0;
-    } else {
-      turno.f1 = 0;
-      turno.f2 = 0;
-      turno.f3 = 0;
-    }
+  victory(this);
+
+  if (turno.mov && mov && newX >= 1 && newY >= 1 && newX <= 24 && newY <= 24 && Juego[newX-1][newY-1] == '0' && mov <= turno.m ) {
+    turno.m -= mov;
     Juego[newX-1][newY-1] = Juego[turno.onSelectx-1][turno.onSelecty-1];
     Juego[turno.onSelectx-1][turno.onSelecty-1] = '0'
     turno.mov = false;
@@ -142,6 +74,15 @@ Estado1.moverse = function () {
         this['tablero' + i.toString() + 'x' + j.toString()].animation.play("normal");
       }
     }
+    this.movimientos.text = "Te quedan " + turno.m +" movimientos";
+    if (!turno.m) newTurno(this);
+  } else {
+    for (let i=1; i<=24; i++) {
+      for (let j=1; j<=24; j++) {
+        this['tablero' + i.toString() + 'x' + j.toString()].animation.play("normal");
+      }
+    }
+    turno.mov = false;
   }
 }
 
@@ -155,6 +96,97 @@ Estado1.disponibilidad1 = function () {
   if (turno.status) {
     disponible(this);
   }
+}
+
+function crearTablero(Player) {
+  for (let i = 1; i <= 24; i++) {
+    for (let j = 1; j <= 24; j++) {
+      Player['tablero' + i.toString() + 'x' + j.toString()] = new Kiwi.GameObjects.Sprite( Player, Player.textures.blockSprite, 25*i, 25*j );
+      Player['tablero' + i.toString() + 'x' + j.toString()].animation.add("normal", [0], 0.1, false);
+      Player['tablero' + i.toString() + 'x' + j.toString()].animation.add("disponible", [1], 0.1, false);
+      Player['tablero' + i.toString() + 'x' + j.toString()].animation.play("normal");
+      Player['tablero' + i.toString() + 'x' + j.toString()].input.onUp.add(Player.moverse, Player);
+      Player.addChild( Player['tablero' + i.toString() + 'x' + j.toString()] );
+      sprites.push('tablero' + i.toString() + 'x' + j.toString());
+    }
+  }
+}
+
+function crearBosses(Player) {
+  Player.b1 = new Kiwi.GameObjects.Sprite( Player, Player.textures.b1S, 2*25, 2*25 );
+  Player.b2 = new Kiwi.GameObjects.Sprite( Player, Player.textures.b2S, 23*25, 23*25 );
+
+  Player.addChild( Player.b1 );
+  Player.addChild( Player.b2 );
+  sprites.push('b1');
+  sprites.push('b2');
+}
+
+function crearEsclavos(Player) {
+  for (let i = 1; i <= 6; i++) {
+    Player['e1x' + i.toString()] = new Kiwi.GameObjects.Sprite( Player, Player.textures.e1S, 1*25, (i*3+1)*25 );
+    Player['e2x' + i.toString()] = new Kiwi.GameObjects.Sprite( Player, Player.textures.e2S, 24*25, (24-i*3)*25 );
+    Player['e1x' + i.toString()].input.onDown.add(Player.disponibilidad1, Player);
+    Player['e2x' + i.toString()].input.onDown.add(Player.disponibilidad2, Player);
+    Player.addChild( Player['e1x' + i.toString()] );
+    Player.addChild( Player['e2x' + i.toString()] );
+    sprites.push('e1x' + i.toString());
+    sprites.push('e2x' + i.toString());
+    Juego[0][i*3] = 'e1x' + i.toString();
+    Juego[23][23-i*3] = 'e2x' + i.toString();
+  }
+  for (let i = 1; i <= 6; i++) {
+    Player['e1x' + (i+6).toString()] = new Kiwi.GameObjects.Sprite( Player, Player.textures.e1S, (i*3+1)*25, 1*25 );
+    Player['e2x' + (i+6).toString()] = new Kiwi.GameObjects.Sprite( Player, Player.textures.e2S, (24-i*3)*25, 24*25 );
+    Player['e1x' + (i+6).toString()].input.onDown.add(Player.disponibilidad1, Player);
+    Player['e2x' + (i+6).toString()].input.onDown.add(Player.disponibilidad2, Player);
+    Player.addChild( Player['e1x' + (i+6).toString()] );
+    Player.addChild( Player['e2x' + (i+6).toString()] );
+    sprites.push('e1x' + (i+6).toString());
+    sprites.push('e2x' + (i+6).toString());
+    Juego[i*3][0] = 'e1x' + (i+6).toString();
+    Juego[23-i*3][23] = 'e2x' + (i+6).toString();
+  }
+}
+
+function crearTimers(Player) {
+  Player.counterTextJ1 = new Kiwi.GameObjects.Textfield( Player, "TIEMPO J1: 8:00", 650, 150, "#000", 32, 'normal' );
+  Player.counterTextJ2 = new Kiwi.GameObjects.Textfield( Player, "TIEMPO J2: 8:00", 650, 200, "#000", 32, 'normal' );
+  Player.timerJ1 = Player.game.time.clock.createTimer('timeJ1', 1, 480, false);
+  Player.timerJ1.createTimerEvent( Kiwi.Time.TimerEvent.TIMER_STOP, Player.fin1, Player );
+  Player.timerJ1.createTimerEvent( Kiwi.Time.TimerEvent.TIMER_COUNT, Player.contJ1, Player );
+  Player.timerJ1.start();
+  Player.timerJ1.pause();
+
+  Player.timerJ2 = Player.game.time.clock.createTimer('timeJ2', 1, 480, false);
+  Player.timerJ2.createTimerEvent( Kiwi.Time.TimerEvent.TIMER_STOP, Player.fin2, Player );
+  Player.timerJ2.createTimerEvent( Kiwi.Time.TimerEvent.TIMER_COUNT, Player.contJ2, Player );
+
+  Player.timerJ2.start();
+
+  Player.addChild( Player.counterTextJ1 );
+  Player.addChild( Player.counterTextJ2 );
+  sprites.push('counterTextJ1');
+  sprites.push('counterTextJ2');
+}
+
+function crearBoton(Player) {
+  Player.myButton = new Kiwi.HUD.Widget.Button( Player.game, 'Finalizar Turno', 650, 25 );
+  Player.game.huds.defaultHUD.addWidget( Player.myButton );
+  sprites.push('myButton');
+
+  Player.myButton.style.color = 'white';
+  Player.myButton.style.fontSize = '2em';
+  Player.myButton.style.fontWeight = 'bold';
+  Player.myButton.style.padding = '0.5em 1em';
+  Player.myButton.style.backgroundColor = 'black';
+  Player.myButton.style.cursor = 'pointer';
+
+  Player.myButton.input.onDown.add( Player.buttonPressed, Player );
+  Player.myButton.input.onUp.add( Player.buttonReleased, Player );
+
+  Player.myButton.input.onOver.add( Player.buttonOver, Player );
+  Player.myButton.input.onOut.add( Player.buttonOut, Player );
 }
 
 function disponible(Player) {
@@ -173,7 +205,7 @@ function disponible(Player) {
     turno.mov = true;
     for (let i=1; i<=24; i++) {
       for (let j=1; j<=24; j++) {
-        if (Math.abs(i-x) + Math.abs(j-y) <= turno.f1 + turno.f2 + turno.f3) {
+        if (Math.abs(i-x) + Math.abs(j-y) <= turno.m) {
           Player['tablero' + i.toString() + 'x' + j.toString()].animation.play("disponible");
         } else {
           Player['tablero' + i.toString() + 'x' + j.toString()].animation.play("normal");
@@ -189,6 +221,7 @@ Estado1.fin1 = function() {
 Estado1.fin2 = function() {
   this.counterTextJ2.text =  "Perdiste J2";
 }
+
 Estado1.contJ1 = function() {
   tiempo1 -= 1;
   let m = Math.floor(tiempo1/60);
@@ -211,9 +244,11 @@ Estado1.buttonPressed = function() {
 }
 
 Estado1.buttonReleased = function() {
-  newTurno(this);
-  this.myButton.x = 650;
-  this.myButton.y = 25;
+  if (!turno.chickendinner) {
+    newTurno(this);
+    this.myButton.x = 650;
+    this.myButton.y = 25;
+  }
 }
 
 Estado1.buttonOver = function() {
@@ -224,29 +259,126 @@ Estado1.buttonOut = function() {
   this.myButton.style.backgroundColor = 'black';
 }
 
+function borrarTodo(Player) {
+  for (let i = 0; i < sprites.length; i++) {
+    Player[sprites[i]].x = 9999;
+    Player[sprites[i]].y = 9999;
+  }
+}
+
+function cWin(Player, b) {
+  let lista = [0, 0, 0, 0];
+  for (let i = turno[b][0]-1; i >= 0; i--) {
+    if (Juego[i][turno[b][1]][0] == 'e') {
+      lista[0] = parseInt(Juego[i][turno[b][1]][1]);
+      break;
+    }
+  }
+
+  for (let i = turno[b][0]+1; i < 24; i++) {
+    if (Juego[i][turno[b][1]][0] == 'e') {
+      lista[1] = parseInt(Juego[i][turno[b][1]][1]);
+      break;
+    }
+  }
+
+  for (let i = turno[b][1]-1; i >= 0; i--) {
+    if (Juego[turno[b][0]][i][0] == 'e') {
+      lista[2] = parseInt(Juego[turno[b][0]][i][1]);
+      break;
+    }
+  }
+
+  for (let i = turno[b][1]+1; i < 24; i++) {
+    if (Juego[turno[b][0]][i][0] == 'e') {
+      lista[3] = parseInt(Juego[turno[b][0]][i][1]);
+      break;
+    }
+  }
+
+  if (lista[0] == lista[1] && lista[1] == lista[2] && lista[2] == lista[3]) return lista[0];
+}
+
+function victory(Player) {
+  let p1 = cWin(Player, 'b1');
+  let p2 = cWin(Player, 'b2');
+  if (p2) {
+    Player.winner.text = 'EL GANADOR ES EL JUGADOR 1!';
+    turno.chickendinner = true;
+    borrarTodo(Player);
+  } else if (p1) {
+    Player.winner.text = 'EL GANADOR ES EL JUGADOR 2!';
+    turno.chickendinner = true;
+    borrarTodo(Player);
+  }
+}
+
+function moverEstrella(b, Player) {
+  for (let i = 0; i < 4; i++) {
+    if (turno[b][2] == 1) {
+      if (Juego[turno[b][0]+1][turno[b][1]] == '0' && turno[b][0] < 22) {
+        Juego[turno[b][0]+1][turno[b][1]] = Juego[turno[b][0]][turno[b][1]];
+        Juego[turno[b][0]][turno[b][1]] = '0';
+        turno[b][0] += 1;
+        Player[b].x = (turno[b][0]+1) * 25;
+        break;
+      } else turno[b][2] = 2;
+    } else if (turno[b][2] == 2) {
+      if (Juego[turno[b][0]][turno[b][1]+1] == '0' && turno[b][1] < 22) {
+        Juego[turno[b][0]][turno[b][1]+1] = Juego[turno[b][0]][turno[b][1]];
+        Juego[turno[b][0]][turno[b][1]] = '0';
+        turno[b][1] += 1;
+        Player[b].y = (turno[b][1]+1) * 25;
+        break;
+      } else turno[b][2] = 3;
+    } else if (turno[b][2] == 3) {
+      if (Juego[turno[b][0]-1][turno[b][1]] == '0' && turno[b][0] > 1) {
+        Juego[turno[b][0]-1][turno[b][1]] = Juego[turno[b][0]][turno[b][1]];
+        Juego[turno[b][0]][turno[b][1]] = '0';
+        turno[b][0] -= 1;
+        Player[b].x = (turno[b][0]+1) * 25;
+        break;
+      } else turno[b][2] = 4;
+    } else if (turno[b][2] == 4) {
+      if (Juego[turno[b][0]][turno[b][1]-1] == '0' && turno[b][1] > 1) {
+        Juego[turno[b][0]][turno[b][1]-1] = Juego[turno[b][0]][turno[b][1]];
+        Juego[turno[b][0]][turno[b][1]] = '0';
+        turno[b][1] -= 1;
+        Player[b].y = (turno[b][1]+1) * 25;
+        break;
+      } else turno[b][2] = 1;
+    }
+  }
+}
+
 function newTurno(Player) {
+  moverEstrella('b1', Player);
+  moverEstrella('b2', Player);
+  victory(Player);
+
+  Player.movimientos.text = "Te quedan 10 movimientos";
   for (let i=1; i<=24; i++) {
     for (let j=1; j<=24; j++) {
       Player['tablero' + i.toString() + 'x' + j.toString()].animation.play("normal");
     }
   }
   if (turno.status) {
+    Player.turnoDe.text = "Esta jugando el jugador 2!";
     Player.timerJ2.resume();
     Player.timerJ1.pause();
     turno.status = 0;
     turno.numero += 1;
     turno.mov = false;
-    turno.f1 = 2;
-    turno.f2 = 2;
-    turno.f3 = 4;
+    turno.m = 10;
+    turno.enemyE = 'e1';
   } else {
+    Player.turnoDe.text = "Esta jugando el jugador 1!";
     Player.timerJ1.resume()
     Player.timerJ2.pause();
     turno.status = 1;
     turno.mov = false;
-    turno.f1 = 2;
-    turno.f2 = 2;
-    turno.f3 = 3;
+    turno.m = 10;
+    turno.enemyE = 'e2';
   }
 }
 
