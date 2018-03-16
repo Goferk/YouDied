@@ -23,7 +23,8 @@ var turno = {
   enemyE: 'e1',
   b1: [1, 1, 1],
   b2: [22, 22, 3],
-  chickendinner: false
+  chickendinner: false,
+  jugadas: 2
 };
 
 Estado1.preload = function () {
@@ -62,8 +63,10 @@ Estado1.moverse = function () {
 
   victory(this);
 
-  if (turno.mov && mov && newX >= 1 && newY >= 1 && newX <= 24 && newY <= 24 && Juego[newX-1][newY-1] == '0' && mov <= turno.m ) {
+  if (turno.mov && mov && newX >= 1 && newY >= 1 && newX <= 24 && newY <= 24 &&
+    Juego[newX-1][newY-1] == '0' && mov <= turno.m) {
     turno.m -= mov;
+    turno.jugadas -= 1;
     Juego[newX-1][newY-1] = Juego[turno.onSelectx-1][turno.onSelecty-1];
     Juego[turno.onSelectx-1][turno.onSelecty-1] = '0'
     turno.mov = false;
@@ -299,14 +302,14 @@ function cWin(Player, b) {
   if (lista[0] == lista[1] && lista[1] == lista[2] && lista[2] == lista[3]) return lista[0];
 }
 
-function victory(Player) {
+function victory(Player, b1, b2) {
   let p1 = cWin(Player, 'b1');
   let p2 = cWin(Player, 'b2');
-  if (p2) {
+  if (p2 || b2) {
     Player.winner.text = 'EL GANADOR ES EL JUGADOR 1!';
     turno.chickendinner = true;
     borrarTodo(Player);
-  } else if (p1) {
+  } else if (p1 || b1) {
     Player.winner.text = 'EL GANADOR ES EL JUGADOR 2!';
     turno.chickendinner = true;
     borrarTodo(Player);
@@ -314,6 +317,8 @@ function victory(Player) {
 }
 
 function moverEstrella(b, Player) {
+  let aX = turno[b][0];
+  let aY = turno[b][1];
   for (let i = 0; i < 4; i++) {
     if (turno[b][2] == 1) {
       if (Juego[turno[b][0]+1][turno[b][1]] == '0' && turno[b][0] < 22) {
@@ -321,7 +326,7 @@ function moverEstrella(b, Player) {
         Juego[turno[b][0]][turno[b][1]] = '0';
         turno[b][0] += 1;
         Player[b].x = (turno[b][0]+1) * 25;
-        break;
+        return false;
       } else turno[b][2] = 2;
     } else if (turno[b][2] == 2) {
       if (Juego[turno[b][0]][turno[b][1]+1] == '0' && turno[b][1] < 22) {
@@ -329,7 +334,7 @@ function moverEstrella(b, Player) {
         Juego[turno[b][0]][turno[b][1]] = '0';
         turno[b][1] += 1;
         Player[b].y = (turno[b][1]+1) * 25;
-        break;
+        return false;
       } else turno[b][2] = 3;
     } else if (turno[b][2] == 3) {
       if (Juego[turno[b][0]-1][turno[b][1]] == '0' && turno[b][0] > 1) {
@@ -337,7 +342,7 @@ function moverEstrella(b, Player) {
         Juego[turno[b][0]][turno[b][1]] = '0';
         turno[b][0] -= 1;
         Player[b].x = (turno[b][0]+1) * 25;
-        break;
+        return false;
       } else turno[b][2] = 4;
     } else if (turno[b][2] == 4) {
       if (Juego[turno[b][0]][turno[b][1]-1] == '0' && turno[b][1] > 1) {
@@ -345,16 +350,21 @@ function moverEstrella(b, Player) {
         Juego[turno[b][0]][turno[b][1]] = '0';
         turno[b][1] -= 1;
         Player[b].y = (turno[b][1]+1) * 25;
-        break;
+        return false;
       } else turno[b][2] = 1;
     }
   }
+  if (turno[b][0] == aX && turno[b][1] == aY) return true;
 }
 
 function newTurno(Player) {
-  moverEstrella('b1', Player);
-  moverEstrella('b2', Player);
-  victory(Player);
+  let b1 = moverEstrella('b1', Player);
+  let b2 = moverEstrella('b2', Player);
+  victory(Player, b1, b2);
+
+  turno.mov = false;
+  turno.m = 10;
+  turno.jugadas = 2;
 
   Player.movimientos.text = "Te quedan 10 movimientos";
   for (let i=1; i<=24; i++) {
@@ -368,22 +378,20 @@ function newTurno(Player) {
     Player.timerJ1.pause();
     turno.status = 0;
     turno.numero += 1;
-    turno.mov = false;
-    turno.m = 10;
     turno.enemyE = 'e1';
   } else {
     Player.turnoDe.text = "Esta jugando el jugador 1!";
     Player.timerJ1.resume()
     Player.timerJ2.pause();
     turno.status = 1;
-    turno.mov = false;
-    turno.m = 10;
     turno.enemyE = 'e2';
   }
 }
 
 Estado1.update = function() {
   Kiwi.State.prototype.update.call( this );
+  if (turno.chickendinner) this.myButton.x = 9999;
+  if (!turno.jugadas) newTurno(this);
 }
 
 myGame.states.addState( Estado1 );
