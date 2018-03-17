@@ -231,6 +231,11 @@ Estado1.contJ1 = function() {
   let s = tiempo1 % 60;
   if (s < 10) s = "0" + s;
   this.counterTextJ1.text =  "TIEMPO J1: " + m + ":" + s ;
+  if (tiempo1 <= 0) {
+    this.winner.text = 'EL GANADOR ES EL JUGADOR 2!';
+    turno.chickendinner = true;
+    borrarTodo(this);
+  }
 }
 
 Estado1.contJ2 = function() {
@@ -239,6 +244,11 @@ Estado1.contJ2 = function() {
   let s = tiempo2 % 60;
   if (s < 10) s = "0" + s;
   this.counterTextJ2.text =  "TIEMPO J2: " + m + ":" + s ;
+  if (tiempo2 <= 0) {
+    this.winner.text = 'EL GANADOR ES EL JUGADOR 1!';
+    turno.chickendinner = true;
+    borrarTodo(this);
+  }
 }
 
 Estado1.buttonPressed = function() {
