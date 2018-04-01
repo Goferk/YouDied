@@ -34,12 +34,9 @@ Estado1.preload = function () {
     this.addSpriteSheet('b2S', 'media/b2.png', 25, 25 );
     this.addSpriteSheet('e1S', 'media/e1.png', 25, 25 );
     this.addSpriteSheet('e2S', 'media/e2.png', 25, 25 );
-    this.addImage( 'background', 'media/background.png' );
 }
 
 Estado1.create = function(){
-  this.background = new Kiwi.GameObjects.StaticImage( this, this.textures.background, 0, 0 );
-  this.addChild( this.background );
   crearTimers(this);
   crearBoton(this);
   Kiwi.State.prototype.create.call( this );
